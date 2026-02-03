@@ -4,10 +4,11 @@ from sentence_transformers import SentenceTransformer
 from endee_client import EndeeClient
 
 # Configuration
-DATA_DIR = "../data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "../data")
 COLLECTION_NAME = "semantic_docs"
 MODEL_NAME = "all-MiniLM-L6-v2"
-DOC_MAP_FILE = "doc_map.json"
+DOC_MAP_FILE = os.path.join(BASE_DIR, "doc_map.json")
 
 def main():
     print("Initializing embedding model...")

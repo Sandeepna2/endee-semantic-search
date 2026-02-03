@@ -1,23 +1,33 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from sentence_transformers import SentenceTransformer
 from endee_client import EndeeClient
 import json
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend")
 
+# Serve frontend at root
+@app.route("/")
+def index():
+    return send_from_directory("../frontend", "index.html")
+
+# Load model, client, and doc map
 # Load model, client, and doc map
 print("Loading resources...")
 model = SentenceTransformer("all-MiniLM-L6-v2")
 client = EndeeClient()
 COLLECTION_NAME = "semantic_docs"
-DOC_MAP_FILE = "doc_map.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # Get directory of app.py
+DOC_MAP_FILE = os.path.join(BASE_DIR, "doc_map.json")
 doc_map = {}
 
 # Load document mapping if exists
 if os.path.exists(DOC_MAP_FILE):
     with open(DOC_MAP_FILE, "r") as f:
         doc_map = json.load(f)
+    print(f"Loaded {len(doc_map)} documents from map.")
+else:
+    print(f"Warning: Doc map not found at {DOC_MAP_FILE}")
 
 @app.route("/api/health", methods=["GET"])
 def health():
@@ -62,25 +72,23 @@ def search():
             score = 0.0
             
             # MessagePack might unpack to list/tuple [id, score]
+            # Debugging shows Endee likely returns [distance, id] based on the screenshot behavior.
+            # item[0] was 0.46.. (distance), item[1] was 1.00 (id)
+            
             if isinstance(item, (list, tuple)) and len(item) >= 2:
-                # Assuming first is id, second is score (or vice versa? Usually ID, Distance)
-                # But Endee C++ returns explicit objects.
-                # Let's assume it returns a list of result objects.
-                pass 
+                # Swap assumption: item[0] is distance, item[1] is id
+                raw_score = item[0]
+                raw_id = item[1]
                 
-            # If Client returns list of dicts from some normalization:
-            # Wait, `client.search` logic needs to be robust.
-            # Endee C++: pack(sbuf, search_response) where search_response is std::vector<Result> or ResultSet
-            # Let's assume list of dicts for now or handle raw.
-            # Safest is to just send what we got + lookup text.
-            
-            # Simple fallback for demo:
-            # If item is struct, e.g. [id, score]
-            # Verify structure in live debug? (Can't do here)
-            # We'll assume the client unpacks and it resembles [ {"id": "...", "distance": ...} ]
-            
-            doc_id = str(item.get('id')) if isinstance(item, dict) else str(item[0]) if isinstance(item, (list, tuple)) else None
-            score = float(item.get('distance', 0)) if isinstance(item, dict) else float(item[1]) if isinstance(item, (list, tuple)) else 0.0
+                doc_id = str(int(raw_id)) # Cast float 1.0 -> 1 -> "1"
+                score = float(raw_score)
+            elif isinstance(item, dict):
+                # If dict, we stick to keys
+                doc_id = str(item.get('id'))
+                score = float(item.get('distance', 0))
+            else:
+                 doc_id = None
+                 score = 0.0
             
             text_content = doc_map.get(doc_id, f"Document ID: {doc_id}")
             
@@ -101,29 +109,40 @@ def search():
 def recommend():
     data = request.json
     doc_id = data.get("id")
+    
     if not doc_id:
         return jsonify({"error": "Document ID required"}), 400
 
     # 1. Get Vector for the document
     vec_obj = client.get_vector(COLLECTION_NAME, doc_id)
+    
     if not vec_obj:
          return jsonify({"error": "Document not found"}), 404
 
-    # Extract vector. MsgPack unpack might return dict with 'vector' key
-    # or a structure. Based on C++, likely key 'vector'.
-    # If unpack returns list/tuple, we have to guess. 
-    # Let's assume dict for now based on usual msgpack usage.
+    # Extract vector from Endee response
     query_vector = []
     if isinstance(vec_obj, dict) and 'vector' in vec_obj:
         query_vector = vec_obj['vector']
-    elif isinstance(vec_obj, (list, tuple)) and len(vec_obj) > 1:
-        # Fallback if it is a tuple like (id, vector, ...)
-        # This is a guess if dict fails.
-        query_vector = vec_obj[1] 
+        
+    elif isinstance(vec_obj, (list, tuple)):
+        # MessagePack response structure based on debug:
+        # ['1', b'', '', 0, [VECTOR]] -> Vector is at index 4
+        if len(vec_obj) > 4 and isinstance(vec_obj[4], list):
+             query_vector = vec_obj[4]
+        # Fallback for search result items (id, distance)
+        elif len(vec_obj) >= 2 and isinstance(vec_obj[1], list): 
+             query_vector = vec_obj[1]
+        
+        # Fallback search in list
+        if not query_vector:
+             for item in vec_obj:
+                  if isinstance(item, list) and len(item) > 10: # Vector dim check
+                       query_vector = item
+                       break
     else:
-        # Try to use it directly if it looks like a vector
-        # This part is experimental without live debug
-        pass
+        # Fallback for single vector object
+        if isinstance(vec_obj, list) and len(vec_obj) > 100: 
+            query_vector = vec_obj
 
     if not query_vector:
         return jsonify({"error": "Could not extract vector from document"}), 500
@@ -140,11 +159,19 @@ def recommend():
             items = results
             
         for item in items:
-            d_id = str(item.get('id')) if isinstance(item, dict) else str(item[0]) if isinstance(item, (list, tuple)) else None
-            score = float(item.get('distance', 0)) if isinstance(item, dict) else float(item[1]) if isinstance(item, (list, tuple)) else 0.0
+            d_id = None
+            score = 0.0
+            
+            if isinstance(item, (list, tuple)) and len(item) >= 2:
+                # Swap assumption: item[0] is distance, item[1] is id
+                d_id = str(int(item[1]))
+                score = float(item[0])
+            elif isinstance(item, dict):
+                d_id = str(item.get('id'))
+                score = float(item.get('distance', 0))
             
             # Filter out self
-            if d_id == doc_id:
+            if d_id == str(doc_id): 
                 continue
                 
             text_content = doc_map.get(d_id, f"Document ID: {d_id}")

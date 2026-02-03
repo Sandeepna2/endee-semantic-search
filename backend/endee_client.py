@@ -99,7 +99,10 @@ class EndeeClient:
         Retrieves a vector by ID.
         """
         url = f"{self.base_url}/index/{collection_name}/vector/get"
-        payload = {"id": doc_id}
+        
+        # Endee requires String ID (confirmed by debug).
+        payload = {"id": str(doc_id)}
+        
         try:
             response = requests.post(url, headers=self.headers, json=payload)
             if response.status_code == 200:

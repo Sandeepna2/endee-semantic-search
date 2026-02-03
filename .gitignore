@@ -1,9 +1,23 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
 .env
+venv/
+.venv/
+env/
+
+# Docker
+docker-compose.override.yml
+
+# Endee Data (Volume)
+endee-data/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
 .DS_Store
-doc_map.json
-backend/doc_map.json
-data/
-!data/sample.txt
-endee_source/
+Thumbs.db
