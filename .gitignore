@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.env
+.DS_Store
+doc_map.json
+backend/doc_map.json
+data/
+!data/sample.txt
+endee_source/
