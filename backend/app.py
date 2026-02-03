@@ -15,7 +15,8 @@ def index():
 # Load model, client, and doc map
 print("Loading resources...")
 model = SentenceTransformer("all-MiniLM-L6-v2")
-client = EndeeClient()
+endee_host = os.getenv("ENDEE_HOST", "localhost")
+client = EndeeClient(base_url=f"http://{endee_host}:8080/api/v1")
 COLLECTION_NAME = "semantic_docs"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__)) # Get directory of app.py
 DOC_MAP_FILE = os.path.join(BASE_DIR, "doc_map.json")
@@ -76,16 +77,16 @@ def search():
             # item[0] was 0.46.. (distance), item[1] was 1.00 (id)
             
             if isinstance(item, (list, tuple)) and len(item) >= 2:
-                # Swap assumption: item[0] is distance, item[1] is id
+                # Endee typically returns [similarity, id]
                 raw_score = item[0]
                 raw_id = item[1]
                 
-                doc_id = str(int(raw_id)) # Cast float 1.0 -> 1 -> "1"
+                doc_id = str(int(raw_id)) 
+                # Scores are already similarities (0.0 to 1.0)
                 score = float(raw_score)
             elif isinstance(item, dict):
-                # If dict, we stick to keys
                 doc_id = str(item.get('id'))
-                score = float(item.get('distance', 0))
+                score = float(item.get('similarity', item.get('distance', 0)))
             else:
                  doc_id = None
                  score = 0.0
@@ -163,12 +164,12 @@ def recommend():
             score = 0.0
             
             if isinstance(item, (list, tuple)) and len(item) >= 2:
-                # Swap assumption: item[0] is distance, item[1] is id
+                # Endee typically returns [similarity, id]
                 d_id = str(int(item[1]))
                 score = float(item[0])
             elif isinstance(item, dict):
                 d_id = str(item.get('id'))
-                score = float(item.get('distance', 0))
+                score = float(item.get('similarity', item.get('distance', 0)))
             
             # Filter out self
             if d_id == str(doc_id): 

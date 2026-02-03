@@ -15,7 +15,8 @@ def main():
     model = SentenceTransformer(MODEL_NAME)
     
     print("Initializing Endee client...")
-    client = EndeeClient()
+    endee_host = os.getenv("ENDEE_HOST", "localhost")
+    client = EndeeClient(base_url=f"http://{endee_host}:8080/api/v1")
     
     # 1. Read Data
     documents = []
@@ -41,14 +42,20 @@ def main():
     dimension = len(embeddings[0])
     print(f"Embedding dimension: {dimension}")
 
-    # 3. Create Collection
-    # Check if exists first
-    existing_indexes = client.list_indexes()
-    if COLLECTION_NAME not in existing_indexes:
-        print(f"Creating index '{COLLECTION_NAME}'...")
-        client.create_collection(COLLECTION_NAME, dimension)
-    else:
-        print(f"Index '{COLLECTION_NAME}' already exists.")
+    # 3. Create Collection (Force Refresh)
+    print(f"Resetting index '{COLLECTION_NAME}'...")
+    client.delete_collection(COLLECTION_NAME)
+    
+    # Wait for deletion to propagate
+    import time
+    for _ in range(5):
+        if COLLECTION_NAME not in client.list_indexes():
+            break
+        print("Waiting for deletion...")
+        time.sleep(2)
+
+    print(f"Creating index '{COLLECTION_NAME}'...")
+    client.create_collection(COLLECTION_NAME, dimension)
 
     # 4. Insert into Endee & Save Map
     print("Inserting into Endee...")

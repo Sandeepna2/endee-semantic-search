@@ -22,7 +22,7 @@ echo Docker is running.
 :: 2. Start Endee Container
 echo.
 echo [2/4] Starting Endee Database container...
-docker-compose up -d
+docker-compose up -d endee
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to start Endee container.
     pause

@@ -1,84 +1,72 @@
 # Endee Semantic Search Project
 
-This project demonstrates a Semantic Search application using **Endee** as the high-performance vector database. It ingests text documents, generates vector embeddings using SentenceTransformers, and provides a web interface for searching.
+This project implements a high-performance **Semantic Search** application powered by the **Endee Vector Database**. It enables searching through text documents based on their underlying meaning and intent, rather than just literal keyword matching.
 
-## Problem Statement
-Traditional keyword search fails to capture the intent and context of queries. This project implements **semantic search** to find relevant documents based on meaning rather than just keyword matching, leveraging the speed of the Endee vector database.
+## Key Features
+
+- **Semantic Vector Search**: Uses state-of-the-art embeddings to find relevant content even when search terms don't match exactly.
+- **Similarity Recommendations**: "Find Similar" feature to explore related segments of the knowledge base.
+- **High-Performance Storage**: Leverages **Endee** for sub-millisecond vector retrieval.
+- **Premium UI**: Modern, responsive interface with real-time match scores.
 
 ## Technical Approach
 
 ### Architecture
-- **Database**: Endee (Vector Database) running in Docker.
-- **Backend**: Python (Flask).
-- **Embeddings**: `sentence-transformers/all-MiniLM-L6-v2` (384 dimensions).
-- **Frontend**: HTML5/CSS3/JavaScript (Single Page Application).
+- **Vector Database**: Endee (Latest Docker Image).
+- **Backend API**: Python 3.8+ (Flask).
+- **AI Model**: `sentence-transformers/all-MiniLM-L6-v2` (384-dimension embeddings).
+- **Frontend**: Premium Single Page Application (HTML5/CSS3/JS).
 
-### Data Flow
-1. **Ingestion**: 
-   - Text files are read from `data/`.
-   - Text is split into paragraphs.
-   - `SentenceTransformer` converts text to vectors.
-   - Vectors + Text Payload are inserted into Endee via API.
-2. **Search**:
-   - User queries via Frontend.
-   - Backend vectorizes the query.
-   - Vector search is performed against Endee.
-   - Results are returned and displayed.
+### Data Flow & Improvements
+1. **Intelligent Ingestion**:
+   - Documents are chunked by meaningful paragraphs.
+   - The system automatically **drops and recreates** the Endee index on each ingestion to ensure a clean, optimized state.
+2. **Accurate Scoring**:
+   - The backend uses Endee's **Cosine Similarity** space.
+   - Scores are normalized to user-friendly percentages (e.g., "Match: 95%").
 
-## Setup Instructions
+## Setup & Running
 
-### Prerequisites
-- Docker & Docker Compose
-- Python 3.8+
+### 1. Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (must be running).
+- Python 3.8+.
 
-### 1. Start Endee Database
-Ensure Docker Desktop is running, then:
-```bash
-docker-compose up -d
+### 2. Quick Start (Windows)
+We provide a launcher for easy setup:
+```powershell
+./run_on_windows.bat
 ```
-Verify it is running:
-- API should be accessible at `http://localhost:8080`.
-
-### 2. Install Dependencies
-```bash
-pip install -r backend/requirements.txt
-```
+This script will start the Endee container, check dependencies, and launch the API at `http://localhost:5000`.
 
 ### 3. Ingest Data
-Load the sample data into Endee:
+Once the database is up, load the sample documents:
 ```bash
-cd backend
-python ingest.py
+python backend/ingest.py
 ```
 
-### 4. Run the Application
-Start the search API:
-```bash
-# From backend/ directory
-python app.py
-```
-Type `y` if asked to confirm anything.
-
-### 5. Access Frontend
-Open `frontend/index.html` in your browser.
-Enter a query like "What is RAG?" or "How does vector search work?" to see results.
+### 4. Access the Application
+Open `frontend/index.html` in your browser. Try queries like:
+- *"Artificial Intelligence"*
+- *"How do vector databases work?"*
+- *"Neural Networks"* (to test semantic matching)
 
 ## Project Structure
 ```
-c:/endee-semantic-search/
 ├── backend/
-│   ├── app.py              # Flask API
-│   ├── ingest.py           # Data ingestion
-│   ├── endee_client.py     # Endee API wrapper
-│   └── requirements.txt
+│   ├── app.py              # Flask Search & Recommend API
+│   ├── ingest.py           # Data ingestion & Index management
+│   ├── endee_client.py     # Endee REST API wrapper
+│   └── doc_map.json        # Document metadata mapping
 ├── frontend/
-│   └── index.html          # UI
-├── data/                   # Sample documents
-└── docker-compose.yml      # Endee Service
+│   └── index.html          # Premium Search UI
+├── data/
+│   └── sample.txt          # Source knowledge base content
+├── docker-compose.yml      # Endee Service configuration
+└── run_on_windows.bat      # Automated Launcher
 ```
 
 ## How Endee is Used
-Endee is used as the core storage and retrieval engine for vector embeddings. We interact with it via REST API to:
-- Create collections (if applicable).
-- Insert 384-dimension vectors.
-- Perform cosine similarity search (or L2/DotProduct) to find the nearest neighbors for a query vector.
+Endee serves as the core engine for this project. We interact with its API to:
+- **Manage Collections**: Dynamically create and drop indexes.
+- **Vector Storage**: Store 384-dimension document embeddings with JSON payloads.
+- **Vector Search**: Perform lightning-fast cosine similarity searches for query vectors.
