@@ -94,6 +94,26 @@ class EndeeClient:
             print(f"Error searching: {e}")
             return []
 
+    def get_vector(self, collection_name, doc_id):
+        """
+        Retrieves a vector by ID.
+        """
+        url = f"{self.base_url}/index/{collection_name}/vector/get"
+        payload = {"id": doc_id}
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            if response.status_code == 200:
+                # Response is MessagePack
+                if response.headers.get("Content-Type") == "application/msgpack":
+                    return msgpack.unpackb(response.content, raw=False)
+                return response.json() # Fallback
+            else:
+                print(f"Error getting vector: {response.text}")
+                return None
+        except Exception as e:
+            print(f"Error getting vector: {e}")
+            return None
+
     def list_indexes(self):
         url = f"{self.base_url}/index/list"
         try:

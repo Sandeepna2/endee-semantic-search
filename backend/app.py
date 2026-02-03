@@ -97,5 +97,68 @@ def search():
 
     return jsonify({"results": formatted_results})
 
+@app.route("/api/recommend", methods=["POST"])
+def recommend():
+    data = request.json
+    doc_id = data.get("id")
+    if not doc_id:
+        return jsonify({"error": "Document ID required"}), 400
+
+    # 1. Get Vector for the document
+    vec_obj = client.get_vector(COLLECTION_NAME, doc_id)
+    if not vec_obj:
+         return jsonify({"error": "Document not found"}), 404
+
+    # Extract vector. MsgPack unpack might return dict with 'vector' key
+    # or a structure. Based on C++, likely key 'vector'.
+    # If unpack returns list/tuple, we have to guess. 
+    # Let's assume dict for now based on usual msgpack usage.
+    query_vector = []
+    if isinstance(vec_obj, dict) and 'vector' in vec_obj:
+        query_vector = vec_obj['vector']
+    elif isinstance(vec_obj, (list, tuple)) and len(vec_obj) > 1:
+        # Fallback if it is a tuple like (id, vector, ...)
+        # This is a guess if dict fails.
+        query_vector = vec_obj[1] 
+    else:
+        # Try to use it directly if it looks like a vector
+        # This part is experimental without live debug
+        pass
+
+    if not query_vector:
+        return jsonify({"error": "Could not extract vector from document"}), 500
+
+    # 2. Search for similar (get k+1 to exclude self)
+    results = client.search(COLLECTION_NAME, query_vector, top_k=6)
+    
+    formatted_results = []
+    try:
+        items = []
+        if isinstance(results, dict):
+             items = results.get("results", [])
+        elif isinstance(results, list):
+            items = results
+            
+        for item in items:
+            d_id = str(item.get('id')) if isinstance(item, dict) else str(item[0]) if isinstance(item, (list, tuple)) else None
+            score = float(item.get('distance', 0)) if isinstance(item, dict) else float(item[1]) if isinstance(item, (list, tuple)) else 0.0
+            
+            # Filter out self
+            if d_id == doc_id:
+                continue
+                
+            text_content = doc_map.get(d_id, f"Document ID: {d_id}")
+            
+            formatted_results.append({
+                "score": score,
+                "text": text_content,
+                "id": d_id
+            })
+
+    except Exception as e:
+        print(f"Error parsing recommend results: {e}")
+
+    return jsonify({"results": formatted_results})
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
