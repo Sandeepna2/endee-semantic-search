@@ -9,6 +9,29 @@ This project implements a high-performance **Semantic Search** application power
 - **High-Performance Storage**: Leverages **Endee** for sub-millisecond vector retrieval.
 - **Premium UI**: Modern, responsive interface with real-time match scores.
 
+## App Screenshots
+<table> 
+   <tr> 
+      <td align="center"> 
+         <h4>🟣 Search Home</h4> 
+         <img width="1366" height="726" alt="image" src="https://github.com/user-attachments/assets/7416faf3-cfbc-4ea0-b612-1bd137bd71fb" width="500"/> 
+      </td> 
+      <td align="center"> 
+         <h4>🟣 Search Results</h4> 
+         <img width="1364" height="727" alt="image" src="https://github.com/user-attachments/assets/e4813cc4-7566-4c04-89ea-c916ccdb749c" width="500"/> 
+      </td> 
+   </tr> 
+   <tr> 
+      <td align="center"> 
+         <h4>🟣 Similarity Recommendation</h4>
+        <img width="1366" height="726" alt="image" src="https://github.com/user-attachments/assets/87f4ac6b-3117-4466-b84d-102f7f30aa58" width="500"/> 
+      </td> <td align="center"> 
+         <h4>🟣 Ranked Semantic Matches</h4>
+         <img width="1366" height="727" alt="image" src="https://github.com/user-attachments/assets/304f5f7e-2677-41cd-8cba-309be13d4c0c" width="500"/> 
+      </td> 
+   </tr>
+</table> 
+
 ## Technical Approach
 
 ### Architecture
@@ -49,6 +72,47 @@ Open `frontend/index.html` in your browser. Try queries like:
 - *"Artificial Intelligence"*
 - *"How do vector databases work?"*
 - *"Neural Networks"* (to test semantic matching)
+
+## 🐳 Docker Environment Details
+
+The application is fully containerized for consistent deployment. Below is the current environment state:
+
+### Containers & Services
+| Service Name | Image | Port Mapping | Status |
+| :--- | :--- | :--- | :--- |
+| **endee-server** | `endeeio/endee-server:latest` | `8080:8080` | Running |
+| **project-web** | `project-web:latest` | `5000:5000` | Running |
+
+### Volumes & Persistence
+| Volume Name | Purpose | Size |
+| :--- | :--- | :--- |
+| `endee-semantic-search_endee-data` | Endee Vector Storage | ~2.3 GB |
+| `project_endee-data` | Legacy/Backup DB Data | ~1.2 GB |
+
+## Docker Infrastructure View
+<table> 
+   <tr> 
+      <td align="center"> 
+         <h4>🟣 Container Status</h4> 
+         <img width="1366" height="726" alt="image" src="https://github.com/user-attachments/assets/ba4e2c72-af38-4491-9158-b6bf1430225e" />
+      </td> 
+      <td align="center"> 
+         <h4>🟣 Image Registry</h4> 
+        <img width="1366" height="727" alt="image" src="https://github.com/user-attachments/assets/851b3803-eb9a-45b7-ae41-baaff7730e28" /> 
+      </td> 
+   </tr> 
+   <tr> 
+      <td align="center"> 
+         <h4>🟣 Volume Persistence</h4> 
+        <img width="1366" height="728" alt="image" src="https://github.com/user-attachments/assets/43e2553b-2a91-44ab-8fd8-e6224cfe316d" />
+      </td> 
+      <td align="center"> 
+         <h4>🟣 Build History</h4> 
+         <img width="1366" height="726" alt="image" src="https://github.com/user-attachments/assets/b7442eb8-7f3d-44c2-8d7b-73b3b5914995" />
+      </td> 
+   </tr> 
+</table>
+
 
 ## Project Structure
 ```
