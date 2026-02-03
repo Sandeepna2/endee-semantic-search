@@ -113,6 +113,20 @@ The application is fully containerized for consistent deployment. Below is the c
    </tr> 
 </table>
 
+## 🚀 Endee Vector Management
+
+The **Endee Dashboard** provides a powerful interface for managing vector indexes, monitoring performance, and overseeing data persistence.
+Overview of the <b>semantic_docs</b> vector index configured with 384-dimensional embeddings and cosine similarity for semantic search.
+<table> 
+   <tr> 
+      <td align="center"> 
+         <h4>🟣 Index Overview</h4> 
+         <img width="500"" alt="image" src="https://github.com/user-attachments/assets/665a3c4e-a592-4891-acad-cbb81db2fadc" />
+         <p><i>Real-time monitoring of the <b>semantic_docs</b> index (384 Dimensions, Cosine Space).
+      </td> 
+   </tr> 
+</table>
+
 
 ## Project Structure
 ```
