@@ -9,7 +9,7 @@ This project implements a high-performance **Semantic Search** application power
 - **High-Performance Storage**: Leverages **Endee** for sub-millisecond vector retrieval.
 - **Premium UI**: Modern, responsive interface with real-time match scores.
 
-## App Screenshots
+## 📸 App Screenshots
 <table> 
    <tr> 
       <td align="center"> 
@@ -89,7 +89,7 @@ The application is fully containerized for consistent deployment. Below is the c
 | `endee-semantic-search_endee-data` | Endee Vector Storage | ~2.3 GB |
 | `project_endee-data` | Legacy/Backup DB Data | ~1.2 GB |
 
-## Docker Infrastructure View
+## 🐳 Docker Infrastructure View
 <table> 
    <tr> 
       <td align="center"> 
