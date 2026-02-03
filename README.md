@@ -18,7 +18,7 @@ This project implements a high-performance **Semantic Search** application power
       </td> 
       <td align="center"> 
          <h4>🟣 Search Results</h4> 
-         <img width="1364" height="727" alt="image" src="https://github.com/user-attachments/assets/e4813cc4-7566-4c04-89ea-c916ccdb749c" width="500"/> 
+         <img width="1364" height="726" alt="image" src="https://github.com/user-attachments/assets/e4813cc4-7566-4c04-89ea-c916ccdb749c" width="500"/> 
       </td> 
    </tr> 
    <tr> 
@@ -27,7 +27,7 @@ This project implements a high-performance **Semantic Search** application power
         <img width="1366" height="726" alt="image" src="https://github.com/user-attachments/assets/87f4ac6b-3117-4466-b84d-102f7f30aa58" width="500"/> 
       </td> <td align="center"> 
          <h4>🟣 Ranked Semantic Matches</h4>
-         <img width="1366" height="727" alt="image" src="https://github.com/user-attachments/assets/304f5f7e-2677-41cd-8cba-309be13d4c0c" width="500"/> 
+         <img width="1366" height="726" alt="image" src="https://github.com/user-attachments/assets/304f5f7e-2677-41cd-8cba-309be13d4c0c" width="500"/> 
       </td> 
    </tr>
 </table> 
